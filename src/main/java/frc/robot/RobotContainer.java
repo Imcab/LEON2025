@@ -6,21 +6,43 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.Subsystems.Components.Elevator.Elevator;
-import frc.robot.Subsystems.Components.Elevator.ElevatorBuilder;
-import frc.robot.Subsystems.Components.Elevator.ElevatorConstants.ElevatorType;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Commands.movePosition;
+import frc.robot.Commands.moveVelocity;
+import frc.robot.Commands.moveVoltage;
+import frc.robot.Commands.swerve.DriveCommands;
+import frc.robot.Subsystems.ElevatorSubsystem;
+import frc.robot.Subsystems.Components.Climber;
+import frc.robot.Subsystems.Drive.swerve;
+
 
 public class RobotContainer {
   
-  public Elevator elevator;
+  //public Climber climber;
+  public ElevatorSubsystem elevator = new ElevatorSubsystem("ELEVATOR");
+  public CommandXboxController driver = new CommandXboxController(0);
+  public swerve drive = new swerve();
 
   public RobotContainer() {
-
-    elevator = new Elevator(new ElevatorBuilder(ElevatorType.kLEON));
+    
+    //climber = new Climber();
     configureBindings();
   }
 
-  private void configureBindings() {}
+  private void configureBindings() {
+
+    drive.setDefaultCommand(DriveCommands.joystickDrive(drive, ()-> driver.getLeftY() * 0.8, ()-> driver.getLeftX() * 0.8, ()-> -driver.getRightX() * 0.7));
+
+    elevator.handleState(()-> driver.back().getAsBoolean());
+
+    driver.a().whileTrue(new movePosition(elevator, ()-> 0.63));
+    driver.b().whileTrue(new movePosition(elevator, ()-> 0.89));
+    driver.x().whileTrue(new movePosition(elevator, ()-> 1.87));
+    driver.y().whileTrue(new movePosition(elevator, ()-> 1.30));
+    driver.povLeft().whileTrue(new moveVelocity(elevator, -0.1));
+    driver.povDown().whileTrue(new InstantCommand(()-> elevator.stop(), elevator));
+  }
 
   public Command getAutonomousCommand() {
     return Commands.print("No autonomous command configured");
