@@ -14,11 +14,13 @@ public class VisionConfig {
     
     public static class limelight {
         public static final String name = "limelight-buluk";
-        public static final int forwardCoefficient = 1; // if the robot never turns in the correct direction, kP should be inverted.
+        public static final int forwardCoefficient = -1; // if the robot never turns in the correct direction, kP should be inverted.
         public static final int aimCoefficient = -1;
+        public static final int translationCoeficient = -1;
         public static final boolean useMegatag2 = true;
-        public static final double forwardKp = 0.07; //0.2
-        public static final double angularKp = 0.005; //0.01158
+        public static final double forwardKp = 0.25; //0.2
+        public static final double angularKp = 0.003; //0.01158
+        public static final double translationKp = 0.0004; 
         public static final boolean useTAforRange = true;
         public static final Matrix<N3,N1> trust = VecBuilder.fill(0.7, 0.7, 99999);
 

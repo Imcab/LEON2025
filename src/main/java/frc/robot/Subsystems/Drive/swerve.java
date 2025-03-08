@@ -1,5 +1,6 @@
 package frc.robot.Subsystems.Drive;
 
+import edu.wpi.first.apriltag.AprilTagPoseEstimator;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -14,9 +15,6 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructArrayPublisher;
-import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -28,6 +26,9 @@ import frc.robot.BulukLib.Swerve.SwerveConfig.reductions;
 import frc.robot.BulukLib.Vision.LimelightHelpers;
 import frc.robot.BulukLib.Vision.VisionConfig;
 import frc.robot.BulukLib.Vision.VisionConfig.limelight;
+import frc.robot.SwerveLib.AdvantageUtil.AdvantageScopeData;
+import frc.robot.SwerveLib.Dashboard.AdvantageSwerve;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
@@ -41,17 +42,6 @@ public class swerve extends SubsystemBase{
   
     private final AHRS navX =  new AHRS(NavXComType.kMXP_SPI);
 
-    //For advantage scope
-    StructPublisher<Pose2d> odometrypublisher = NetworkTableInstance.getDefault()
-    .getStructTopic("Botpose2D", Pose2d.struct).publish();
-
-    StructPublisher<ChassisSpeeds> ChassisSpeedpublisher = NetworkTableInstance.getDefault()
-    .getStructTopic("ChassisSpeeds", ChassisSpeeds.struct).publish();
-
-    StructArrayPublisher<SwerveModuleState> ModuleStatepublisher = NetworkTableInstance.getDefault()
-    .getStructArrayTopic("SwerveStates", SwerveModuleState.struct).publish();
-
-    
     private static final double MAX_LINEAR_SPEED = Units.feetToMeters(19.0);
     private static final double TRACK_WIDTH_X = SwerveConfig.measures.TRACK_WIDTH_X; 
     private static final double TRACK_WIDTH_Y = SwerveConfig.measures.TRACK_WIDTH_Y; 
@@ -61,10 +51,8 @@ public class swerve extends SubsystemBase{
 
     private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
 
-    //private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(SwerveConfig.measures.getTranslations());
-
     private Rotation2d rawGyroRotation = new Rotation2d();
-    private SwerveModulePosition[] lastModulePositions = // For delta tracking
+    private SwerveModulePosition[] lastModulePositions =
       new SwerveModulePosition[] {
         new SwerveModulePosition(),
         new SwerveModulePosition(),
@@ -74,12 +62,22 @@ public class swerve extends SubsystemBase{
     private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
-    ModuleSpark []modules  = new ModuleSpark[4];
+      private SwerveDrivePoseEstimator poseEstimatorApril =
+      new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
-    Vision vision = new Vision();
+    private ModuleSpark []modules  = new ModuleSpark[4];
+
+    private Vision vision = new Vision();
+
+    private AdvantageSwerve swervePublisher = new AdvantageSwerve("BulukSwerve");
+
+    private double [] meters = new double[4];
+
+    private double[] metersPerSec = new double[4];
+
+    private double[] encoders = new double[4];
 
     public swerve(){
-
      
         modules[0] = new ModuleSpark(0);
         modules[1] = new ModuleSpark(1);
@@ -94,7 +92,6 @@ public class swerve extends SubsystemBase{
     
             }
           }).start();
-
 
       //for pathplanner
       AutoBuilder.configure(this::getPose,
@@ -116,32 +113,13 @@ public class swerve extends SubsystemBase{
       ejectLime();
     }
 
-    double [] meters = new double[4];
-
-    double[] metersPerSec = new double[4];
-
-    double [] metersTest = new double[4];
-
-    double [] ositos = new double[4];
-  
-    double[] encoders = new double[4];
-
     public void periodic(){
 
-      odometrypublisher.set(getPose());
-      ChassisSpeedpublisher.set(getChassisSpeeds());
-      ModuleStatepublisher.set(getModuleStates());
+      swervePublisher.sendSwerve(getChassisSpeeds(), getPose(), getModuleStates());
 
       vision.periodic();
 
-      LimelightHelpers.SetRobotOrientation(limelight.name, poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
-
-    
-      /*if (!vision.isLimeEmpty()) {
-        addObservationStd(vision.getLimeObservation().observation(),
-         vision.getLimeObservation().withTimeStamps(),
-          vision.getLimeObservation().getTrust());
-      }*/
+      
 
       for (var module : modules) {
         module.periodic();
@@ -151,6 +129,7 @@ public class swerve extends SubsystemBase{
           module.stop();
       }}
 
+      LimelightHelpers.SetRobotOrientation(limelight.name, poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
 
       meters[0] = modules[0].getDrivePositionMeters();
       meters[1] = modules[1].getDrivePositionMeters();
@@ -162,16 +141,6 @@ public class swerve extends SubsystemBase{
       metersPerSec[2] = modules[2].getRotorMPS();
       metersPerSec[3] = modules[3].getRotorMPS();
 
-      metersTest[0] = modules[0].getRotorMeters();
-      metersTest[1] = modules[1].getRotorMeters();
-      metersTest[2] = modules[2].getRotorMeters();
-      metersTest[3] = modules[3].getRotorMeters();
-
-      ositos[0] = modules[0].getDriveVelocityMetersxSec();
-      ositos[1] = modules[1].getDriveVelocityMetersxSec();
-      ositos[2] = modules[2].getDriveVelocityMetersxSec();
-      ositos[3] = modules[3].getDriveVelocityMetersxSec();
-
       encoders[0] = modules[0].AngleEncoder().getRotations();
       encoders[1] = modules[1].AngleEncoder().getRotations();
       encoders[2] = modules[2].AngleEncoder().getRotations();
@@ -182,15 +151,9 @@ public class swerve extends SubsystemBase{
       SmartDashboard.putNumber("ENCODER BL", encoders[2]);
       SmartDashboard.putNumber("ENCODER BR", encoders[3]);
 
-
-      SmartDashboard.putNumberArray("METERS_MODULES_FIRST", meters);
-
-      SmartDashboard.putNumberArray("METERS_MODULES_CONVERT", metersTest);
+      SmartDashboard.putNumberArray("METERS_MODULES", meters);
 
       SmartDashboard.putNumberArray("METERSPERSECOND", metersPerSec);
-
-      SmartDashboard.putNumberArray("OSITOS", ositos);
-
 
       SwerveModulePosition[] modulePositions = getModulePositions();
       SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
@@ -217,6 +180,7 @@ public class swerve extends SubsystemBase{
 
       // Apply odometry update
       poseEstimator.update(rawGyroRotation, modulePositions);
+      poseEstimatorApril.update(rawGyroRotation, modulePositions);
     }
 
     public double getAngle(){
@@ -363,8 +327,8 @@ public class swerve extends SubsystemBase{
     var State = kinematics.toSwerveModuleStates(
       ChassisSpeeds.discretize(
         new ChassisSpeeds(
-          vision.range(),
           y,
+          vision.translation(),
           vision.aim()),
           0.02));
 
@@ -376,39 +340,7 @@ public class swerve extends SubsystemBase{
     }
   }
 
-  public void centerWithReef(double y, double limit){
-    var State = kinematics.toSwerveModuleStates(
-      ChassisSpeeds.discretize(
-        new ChassisSpeeds(
-          vision.forwardWithLimit(limit),
-          y,
-          vision.aim()),
-          0.02));
 
-    SwerveDriveKinematics.desaturateWheelSpeeds(State, VisionConfig.limelight.TrackMaxSpeed);
-
-    for (int i = 0; i < 4; i++) {
-      // The module returns the optimized state, useful for logging
-      modules[i].runSetpoint(State[i]);
-    }
-  }
-
-  public void centerWithOff(double y,double off){
-    var State = kinematics.toSwerveModuleStates(
-      ChassisSpeeds.discretize(
-        new ChassisSpeeds(
-          vision.limelight.rangeForwardOffset(off),
-          y,
-          vision.aim()),
-          0.02));
-
-    SwerveDriveKinematics.desaturateWheelSpeeds(State, VisionConfig.limelight.TrackMaxSpeed);
-
-    for (int i = 0; i < 4; i++) {
-      // The module returns the optimized state, useful for logging
-      modules[i].runSetpoint(State[i]);
-    }
-  }
 
 
   public void requestLime(){

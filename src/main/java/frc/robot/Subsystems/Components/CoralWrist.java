@@ -27,16 +27,20 @@ public class CoralWrist extends SubsystemBase{
 
     private DigitalInput beamBreaker = new DigitalInput(Coral.DIO_PORT_SENSOR); 
 
-    private ClosedLoopControl pid;
+    private ClosedLoopControl pidUp;
+    private ClosedLoopControl pidDown;
 
-    private ClosedLoopRequest request; 
+    private ClosedLoopRequest requestUp; 
+    private ClosedLoopRequest requestDown; 
 
     //Declaracion de 
     public CoralWrist(){
 
-        pid  = new ClosedLoopControl(Coral.Gains, OutputType.kNegative);
+        pidUp  = new ClosedLoopControl(Coral.GainsUp, OutputType.kNegative);
+        pidDown  = new ClosedLoopControl(Coral.GainsDown, OutputType.kNegative);
 
-        request = pid.new ClosedLoopRequest();
+        requestUp = pidUp.new ClosedLoopRequest();
+        requestDown = pidDown.new ClosedLoopRequest();
 
         wrist = new SparkMax(Coral.CAN_ID_WRIST, MotorType.kBrushless);
 
@@ -47,15 +51,18 @@ public class CoralWrist extends SubsystemBase{
         ConfigWrist = new SparkMaxConfig();
         ConfigEater = new SparkMaxConfig();
 
-        request.enableOutputClamp(true);
+        requestUp.enableOutputClamp(true);
+        requestUp.withClamp(1);
+        pidUp.setTolerance(0.5);
 
-        request.withClamp(1);
-
-        pid.setTolerance(0.5);
+        requestDown.enableOutputClamp(true);
+        requestDown.withClamp(1);
+        pidDown.setTolerance(0.5);
 
         Burnflash();
 
         setZero();
+
     }
 
     private void Burnflash(){
@@ -84,10 +91,11 @@ public class CoralWrist extends SubsystemBase{
 
     @Override
     public void periodic(){
-        pid.graph("CoralWrist");
-        SmartDashboard.putNumber("[CORALWRIST]: RawPosition:", getRawPosition());
-        SmartDashboard.putBoolean("[CORALWRIST]: AtGoal:"  , atGoal());
-        SmartDashboard.putNumber("[CORALWRIST]: Target:", target);
+        pidUp.graph("CoralWristUP");
+        pidDown.graph("CoralWristDOWN");
+        SmartDashboard.putNumber("CORALWRIST: RawPosition:", getRawPosition());
+        SmartDashboard.putBoolean("CORALWRIST: AtGoal:"  , atGoal());
+        SmartDashboard.putNumber("CORALWRIST: Target:", target);
         SmartDashboard.putNumber("CoralP", getRawPosition());
         SmartDashboard.putBoolean("PIECE", hasPiece());
     }
@@ -97,7 +105,7 @@ public class CoralWrist extends SubsystemBase{
     }
 
     public double getRawPosition(){
-        return -wristEncoder.getPosition();
+        return ((-wristEncoder.getPosition() * 360)/25);
     }
 
     public void setZero(){
@@ -108,14 +116,14 @@ public class CoralWrist extends SubsystemBase{
         wrist.set(speed);
     }
 
-    public void requestPosition(double rotations){
-        this.target = rotations;
-        wrist.set(pid.runRequest(request.withReference(getRawPosition()).toSetpoint(rotations)));
+    public void requestPositionUp(double degrees){
+        this.target = degrees;
+        wrist.set(pidUp.runRequest(requestUp.withReference(getRawPosition()).toSetpoint(degrees)));
     }
 
-    public void autoRequest(double rotations){
-        this.target = rotations;
-        wrist.set(pid.runRequest(request.withReference(getRawPosition()).toSetpoint(rotations)) * 0.3472);
+    public void requestPositionDown(double degrees){
+        this.target = degrees;
+        wrist.set(pidDown.runRequest(requestDown.withReference(getRawPosition()).toSetpoint(degrees)));
     }
 
     public void wheelSpeed(double speed){
@@ -133,7 +141,7 @@ public class CoralWrist extends SubsystemBase{
 
     public boolean atGoal(){
    
-        return Math.abs(target - getRawPosition()) <= 0.1;
+        return Math.abs(target - getRawPosition()) <= 1.5;
     }
 
 }

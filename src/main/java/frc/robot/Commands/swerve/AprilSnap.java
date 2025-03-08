@@ -12,13 +12,10 @@ import frc.robot.Subsystems.Drive.swerve;
 
 public class AprilSnap extends Command{
     private swerve drive;
-
-    private DoubleSupplier x;
     private DoubleSupplier y;
- 
-    public AprilSnap(swerve drive, DoubleSupplier x, DoubleSupplier y){   
+
+    public AprilSnap(swerve drive, DoubleSupplier y){   
         this.drive = drive;
-        this.x = x;
         this.y = y;
 
         addRequirements(drive);
@@ -33,25 +30,7 @@ public class AprilSnap extends Command{
     @Override
     public void execute(){
 
-        Translation2d velocity = DriveCommands.getLinearVelocityFromJoysticks(x.getAsDouble(), y.getAsDouble());
-
-
-        boolean isFlipped =
-              DriverStation.getAlliance().isPresent()
-                  && DriverStation.getAlliance().get() == Alliance.Red;
-
-        ChassisSpeeds speeds = new ChassisSpeeds(
-            velocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
-             velocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
-              drive.getVision().aim());
-
-        drive.runVelocity(
-              ChassisSpeeds.fromFieldRelativeSpeeds(
-                  speeds,
-                  isFlipped
-                      ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                      : drive.getRotation()));
-
+        drive.centerWithApriltag(y.getAsDouble());
     }
 
     @Override

@@ -87,8 +87,6 @@ public class AlgaeWrist extends SubsystemBase{
         leftWheel.setCANTimeout(0);
         rightWheel.setCANTimeout(0);
 
-        
-
     }
 
     public double getPosition(){
@@ -100,7 +98,7 @@ public class AlgaeWrist extends SubsystemBase{
     }
 
     public void setPosition(double degrees){
-        wrist.set(pid.runRequest(request.withReference(getPosition()).toSetpoint(degrees + 5)));
+        wrist.set(pid.runRequest(request.withReference(getPosition()).toSetpoint(degrees )));
     }
 
 

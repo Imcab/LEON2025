@@ -6,7 +6,7 @@ public class ElevatorConstants {
 
     public static final Domain physicalCapacity = new Domain(0.62, 1.96); //Metros
  
-    public static final double fullMaxVelocity = 1.2522;
+    public static final double fullMaxVelocity = 1.254;
     public static final double fullMaxAcc = 1.242;
 
     public static final int CAN_ID_LEADER = 15;

@@ -1,10 +1,11 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import frc.robot.BulukLib.MotionControllers.Gains.Gains;
 import frc.robot.BulukLib.MotionControllers.Gains.TrapezoidalGains;
 
 public class Constants {
-
+    
     public class ConstantsHanger {
 
         public static final int RightHangerPort = 17;
@@ -40,7 +41,8 @@ public class Constants {
         public static final boolean wheelInverted = false;
         public static final int wristCurrentLimit = 40;
         public static final int wheelCurrentLimit = 15;
-        public static final Gains Gains = new Gains(0.072,0.0063,0.0001);
+        public static final Gains GainsUp = new Gains(0.004,0.0,0.0003);
+        public static final Gains GainsDown = new Gains(0.005,0.0,0.00037);
         public static final double encoderPositionFactor = 360; //degrees
         public static final double wristErrorTolerance = 0.1;  
     }

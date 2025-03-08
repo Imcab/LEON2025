@@ -1,7 +1,7 @@
 package frc.robot.Subsystems.Drive;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.BulukLib.Vision.Limelight;
-import frc.robot.BulukLib.Vision.PoseObservation;
 
 public class Vision {
     public Limelight limelight;
@@ -12,8 +12,9 @@ public class Vision {
 
         limelight = new Limelight();
 
-    }
+        SmartDashboard.putData("LimelightBuluk", limelight);
 
+    }
     public void periodic(){
 
         loop_ONCE = false;
@@ -30,9 +31,6 @@ public class Vision {
 
     }
  
-    public PoseObservation observationLime(){
-        return limelight.getObservation();
-    }
     public void limeRequest(boolean toggle){
         Limerequest = toggle;
     }
@@ -48,11 +46,8 @@ public class Vision {
     public double range(){
         return limelight.rangeForward();
     }
-
-    public double forwardWithLimit(double limit){
-        return limelight.limitForward(limit);
+    public double translation(){
+        return limelight.translation();
     }
-
-    
 
 }

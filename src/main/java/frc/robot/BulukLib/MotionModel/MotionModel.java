@@ -3,10 +3,12 @@ package frc.robot.BulukLib.MotionModel;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.BulukLib.MotionControllers.Gains.PIDGains;
 
-public class MotionModel extends ProfiledPIDController{
+public class MotionModel extends ProfiledPIDController implements Sendable{
 
     public static class Gains{
 
@@ -111,6 +113,32 @@ public class MotionModel extends ProfiledPIDController{
 
     }
 
+    @Override
+    public void initSendable(SendableBuilder builder){
+
+        builder.setSmartDashboardType("MotionModel");
+
+        builder.addDoubleArrayProperty("ProfileGains", ()-> gains.toArray(), null);
+        builder.addDoubleArrayProperty("Constraints", ()-> new double[]{getConstraints().maxVelocity, getConstraints().maxAcceleration}, null);
+
+        builder.addDoubleProperty("Measurement", ()-> measurement, null);
+
+        builder.addDoubleArrayProperty("Setpoint", ()-> new double[]{getSetpoint().position, getSetpoint().velocity}, null);
+        builder.addDoubleArrayProperty("Goal", ()-> new double[]{getGoal().position, getGoal().velocity}, null);
+
+        builder.addDoubleProperty("P", ()-> gains.kP, (value)-> setP(value));
+        builder.addDoubleProperty("I", ()->  gains.kI, (value)-> setI(value));
+        builder.addDoubleProperty("D", ()-> gains.kD, (value)-> setD(value));
+        builder.addDoubleProperty("S", ()-> gains.kS, (value)-> setS(value));
+        builder.addDoubleProperty("V", ()-> gains.kV, (value)-> setV(value));
+        builder.addDoubleProperty("A", ()-> gains.kA, (value)-> setA(value));
+        builder.addDoubleProperty("G", ()-> gains.kG, (value)-> setG(value));
+
+        builder.addDoubleArrayProperty("Tolerance", ()-> new double[]{getPositionTolerance(), getVelocityTolerance()}, (value)-> setTolerance(value[0], value[1]));
+
+
+    }
+
     /**
      * Logs useful data to dashboard. Tolerance, output, ffOutput, Setpoint, Error, atSetpoint, atGoal, Measurement, Gains
      * @param key the key to shown in the dashboard as: [yourKey] Value: 
@@ -170,6 +198,13 @@ public class MotionModel extends ProfiledPIDController{
     public void setV(double kV){
         this.gains.kV = kV;
         setGains(gains);
+    }
+
+    public void setFeedForward(double kV, double kS, double kA, double kG){
+        setV(kV);
+        setS(kS);
+        setA(kA);
+        setG(kG);
     }
 
     /**

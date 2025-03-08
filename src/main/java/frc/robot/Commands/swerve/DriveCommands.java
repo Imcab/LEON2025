@@ -120,31 +120,5 @@ public class DriveCommands {
         );
     }
 
-    public static Command toReef(
-      swerve drive,
-      DoubleSupplier ySupplier, double ty) {
-
-    final SlewRateLimiter m_yspeedLimiter = new SlewRateLimiter(3);
-  
-    return Commands.run(
-        () -> {
-
-        drive.requestLime();
-
-        var ySpeed =
-        -m_yspeedLimiter.calculate(MathUtil.applyDeadband(ySupplier.getAsDouble(), DEADBAND));
-            
-        drive.centerWithReef(ySpeed, ty);
-
-        },
-    
-        drive).until(()-> drive.getVision().limelight.ty() <= 3.9 && drive.getVision().limelight.ty() >= 3.7).
-        
-        finallyDo(
-        drive::stopAndEject
-        );
-    }
-
-    
 }
   
