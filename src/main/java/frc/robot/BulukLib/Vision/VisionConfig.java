@@ -19,8 +19,8 @@ public class VisionConfig {
         public static final int translationCoeficient = -1;
         public static final boolean useMegatag2 = true;
         public static final double forwardKp = 0.25; //0.2
-        public static final double angularKp = 0.003; //0.01158
-        public static final double translationKp = 0.0004; 
+        public static final double angularKp = 0.009; //0.01158
+        public static final double translationKp = 0.01; 
         public static final boolean useTAforRange = true;
         public static final Matrix<N3,N1> trust = VecBuilder.fill(0.7, 0.7, 99999);
 

@@ -21,6 +21,7 @@ public class Limelight implements Sendable{
         builder.addDoubleProperty("TX", ()-> LimelightHelpers.getTX("limelight-buluk"), null);
         builder.addDoubleProperty("TA", ()-> LimelightHelpers.getTA("limelight-buluk"), null);
         builder.addDoubleProperty("TY", ()-> LimelightHelpers.getTY("limelight-buluk"), null);
+        builder.addDoubleProperty("ID", ()-> currentID(), null);
         builder.addBooleanProperty("Connected", ()->isConnected(), null);
         builder.addDoubleProperty("ForwardSpeed", ()-> rangeForward(), null);
         builder.addDoubleProperty("AngularSpeed", ()-> aimAngular(), null);
@@ -35,7 +36,7 @@ public class Limelight implements Sendable{
         LimelightHelpers.setLEDMode_ForceBlink(kName);
     }
     public boolean isConnected(){
-        double lastUpdate = RobotController.getFPGATime() - LimelightHelpers.getLatency_Pipeline("limelight.buluk")/1000;
+        double lastUpdate = RobotController.getFPGATime() - LimelightHelpers.getLatency_Pipeline("limelight-buluk")/1000;
         return lastUpdate < 250;
     }
     public void LedOn(){
@@ -55,25 +56,25 @@ public class Limelight implements Sendable{
     }
 
     public double tx(){
-        return LimelightHelpers.getTX(kName);
+        return LimelightHelpers.getTX("limelight-buluk");
     }
 
     public boolean hasTarget(){
-        return LimelightHelpers.getTV(kName) && isConnected();
+        return LimelightHelpers.getTV("limelight-buluk") && isConnected();
     }
 
     public int targets(){
-        return LimelightHelpers.getTargetCount(kName);
+        return LimelightHelpers.getTargetCount("limelight-buluk");
         
     }
  
     public void update(){
 
         if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get().equals(Alliance.Red)) {
-            mt2 = LimelightHelpers.getBotPoseEstimate_wpiRed_MegaTag2(kName);
+            mt2 = LimelightHelpers.getBotPoseEstimate_wpiRed_MegaTag2("limelight-buluk");
         }
 
-        mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kName);
+        mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-buluk");
     }
 
     public boolean hasResults(){
@@ -81,11 +82,8 @@ public class Limelight implements Sendable{
         return mt2.tagCount > 0 && isConnected();
     }
 
-    public boolean hasID(int ID){
-        
-        LimelightResults results = LimelightHelpers.getLatestResults(kName);
-
-        return hasTarget() && results.valid && results.pipelineID == ID;
+    public double currentID(){
+        return LimelightHelpers.getFiducialID("limelight-buluk");
     }
 
     public PoseObservation getObservation(){

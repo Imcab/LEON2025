@@ -17,8 +17,11 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.BulukLib.Math.DomainUtils;
 import frc.robot.BulukLib.Swerve.SwerveConfig;
 import frc.robot.BulukLib.Swerve.SwerveConfig.currentLimiting;
 import frc.robot.BulukLib.Swerve.SwerveConfig.measures;
@@ -26,9 +29,9 @@ import frc.robot.BulukLib.Swerve.SwerveConfig.reductions;
 import frc.robot.BulukLib.Vision.LimelightHelpers;
 import frc.robot.BulukLib.Vision.VisionConfig;
 import frc.robot.BulukLib.Vision.VisionConfig.limelight;
-import frc.robot.SwerveLib.AdvantageUtil.AdvantageScopeData;
+import frc.robot.Subsystems.REVBlinkin;
+import frc.robot.Subsystems.REVBlinkin.PatternType;
 import frc.robot.SwerveLib.Dashboard.AdvantageSwerve;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
@@ -77,7 +80,14 @@ public class swerve extends SubsystemBase{
 
     private double[] encoders = new double[4];
 
-    public swerve(){
+    public REVBlinkin blinkin;
+
+    private CommandXboxController driveController;
+
+    public swerve(REVBlinkin blinkin, CommandXboxController driveController){
+
+      this.blinkin = blinkin;
+      this.driveController = driveController;
      
         modules[0] = new ModuleSpark(0);
         modules[1] = new ModuleSpark(1);
@@ -108,9 +118,10 @@ public class swerve extends SubsystemBase{
 
     }
 
-    public void stopAndEject() {
-      runVelocity(new ChassisSpeeds());
-      ejectLime();
+    private boolean ledRequested = false;
+
+    public void offLeds(boolean value){
+        this.ledRequested = value;
     }
 
     public void periodic(){
@@ -119,8 +130,30 @@ public class swerve extends SubsystemBase{
 
       vision.periodic();
 
+      boolean validDistance = DomainUtils.inRange(vision.limelight.ty(), -0.7, Double.POSITIVE_INFINITY);
       
+      if (!ledRequested) {
+        if (validDistance && LimelightHelpers.getTV("limelight-buluk")) {
+          blinkin.setPattern(PatternType.Violet);
 
+          if (DriverStation.isTeleopEnabled() && DriverStation.isTeleop()) {
+            driveController.getHID().setRumble(RumbleType.kBothRumble, 0.8);
+          }
+
+        }else if (LimelightHelpers.getTV("limelight-buluk") && !validDistance) {
+  
+          blinkin.setPattern(PatternType.RedOrange);
+
+          if (DriverStation.isTeleopEnabled() && DriverStation.isTeleop()) {
+            driveController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
+          }
+
+        }else {
+          blinkin.setPattern(PatternType.DarkGreen);
+          driveController.getHID().setRumble(RumbleType.kBothRumble, 0);
+        }
+      }
+      
       for (var module : modules) {
         module.periodic();
       }
@@ -176,6 +209,7 @@ public class swerve extends SubsystemBase{
         Twist2d twist = kinematics.toTwist2d(moduleDeltas);
         rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
       }
+
       SmartDashboard.putNumber("NaxX", getAngle());
 
       // Apply odometry update
@@ -323,11 +357,11 @@ public class swerve extends SubsystemBase{
     poseEstimator.addVisionMeasurement(pose, timeStamps);
   }
 
-  public void centerWithApriltag(double y){
+  public void snapApriltag(double forwardSpeed){
     var State = kinematics.toSwerveModuleStates(
       ChassisSpeeds.discretize(
         new ChassisSpeeds(
-          y,
+          forwardSpeed,
           vision.translation(),
           vision.aim()),
           0.02));
@@ -335,22 +369,45 @@ public class swerve extends SubsystemBase{
     SwerveDriveKinematics.desaturateWheelSpeeds(State, VisionConfig.limelight.TrackMaxSpeed);
 
     for (int i = 0; i < 4; i++) {
-      // The module returns the optimized state, useful for logging
       modules[i].runSetpoint(State[i]);
     }
   }
 
+  public void rotateToApril(double forwardSpeed, double translateSpeed){
+    var State = kinematics.toSwerveModuleStates(
+      ChassisSpeeds.discretize(
+        new ChassisSpeeds(
+          forwardSpeed,
+          translateSpeed,
+          vision.aim()),
+          0.02));
 
+    SwerveDriveKinematics.desaturateWheelSpeeds(State, VisionConfig.limelight.TrackMaxSpeed);
 
+    for (int i = 0; i < 4; i++) {
+      modules[i].runSetpoint(State[i]);
+    }
 
-  public void requestLime(){
-    vision.limeRequest(true);
   }
 
-  public void ejectLime(){
-    vision.limeRequest(false);
+  public void followToApril(double translateSpeed){
+    var State = kinematics.toSwerveModuleStates(
+      ChassisSpeeds.discretize(
+        new ChassisSpeeds(
+          vision.range(),
+          translateSpeed,
+          vision.aim()),
+          0.02));
+
+    SwerveDriveKinematics.desaturateWheelSpeeds(State, VisionConfig.limelight.TrackMaxSpeed);
+
+    for (int i = 0; i < 4; i++) {
+      modules[i].runSetpoint(State[i]);
+    }
+
   }
 
- 
+
+
 
 }

@@ -1,4 +1,4 @@
-package frc.robot.Commands.swerve;
+package frc.robot.Commands.DriveCommands;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -97,7 +97,7 @@ public class DriveCommands {
     }, drive);
 }
 
-  public static Command getInRange(
+  public static Command snapToApril(
       swerve drive,
       DoubleSupplier ySupplier) {
 
@@ -106,19 +106,39 @@ public class DriveCommands {
     return Commands.run(
         () -> {
 
-        drive.requestLime();
-
         var ySpeed =
         -m_yspeedLimiter.calculate(MathUtil.applyDeadband(ySupplier.getAsDouble(), DEADBAND));
             
-        drive.centerWithApriltag(ySpeed);
+        drive.snapApriltag(ySpeed);
 
         },
     
         drive).finallyDo(
-        drive::stopAndEject
+        drive::stop
         );
-    }
+  }
+
+  public static Command rotateToApril(
+      swerve drive,
+      DoubleSupplier ySupplier,
+      DoubleSupplier xSupplier) {
+
+    final SlewRateLimiter limiter = new SlewRateLimiter(3);
+  
+    return Commands.run(
+        () -> {
+
+         var ySpeed =
+            -limiter.calculate(MathUtil.applyDeadband(ySupplier.getAsDouble(), DEADBAND));
+
+        drive.rotateToApril(ySpeed, -xSupplier.getAsDouble() * 0.5);
+
+        },
+    
+        drive).finallyDo(
+        drive::stop
+        );
+  }
 
 }
   

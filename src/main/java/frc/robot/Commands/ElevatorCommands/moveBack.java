@@ -1,10 +1,12 @@
-package frc.robot.Commands;
+package frc.robot.Commands.ElevatorCommands;
 
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Subsystems.ElevatorSubsystem;
+import frc.robot.Subsystems.REVBlinkin.PatternType;
 import frc.robot.Subsystems.Components.CoralWrist;
+import frc.robot.Subsystems.Drive.swerve;
 
 public class moveBack extends Command{
     
@@ -12,10 +14,12 @@ public class moveBack extends Command{
     private DoubleSupplier position;
     private CoralWrist coral;
     private double degrees;
+    private swerve drive;
 
-    public moveBack(ElevatorSubsystem elevator, DoubleSupplier position, CoralWrist coral, double degrees){
+    public moveBack(ElevatorSubsystem elevator, DoubleSupplier position, CoralWrist coral, double degrees, swerve Drive){
         this.elevator = elevator;
         this.position = position;
+        this.drive = drive;
 
         this.coral = coral;
         this.degrees = degrees;
@@ -24,16 +28,23 @@ public class moveBack extends Command{
     }
     
     @Override
-    public void initialize () {}
+    public void initialize () {
+        drive.offLeds(true);
+    }
 
     @Override
     public void execute (){
         coral.requestPositionUp(degrees);
         elevator.setPosition(position);
+
+        if( !elevator.atGoal()){
+            drive.blinkin.setPattern(PatternType.TwinklesForestPalette);
+        }
     }
 
     @Override
     public void end (boolean interrupted) {
+        drive.offLeds(false);
         coral.stop();
         elevator.stop();
     }
