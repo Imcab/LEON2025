@@ -1,18 +1,18 @@
 package frc.robot.BulukLib.Vision;
 
-import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import frc.robot.BulukLib.Vision.LimelightHelpers.LimelightResults;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.BulukLib.Vision.LimelightHelpers.PoseEstimate;
 import frc.robot.BulukLib.Vision.VisionConfig.limelight;
 import edu.wpi.first.wpilibj.RobotController;
 
-public class Limelight implements Sendable{
+public class Limelight extends SubsystemBase{
 
     public static final String kName = VisionConfig.limelight.name;
     private PoseEstimate mt2 = new PoseEstimate();
+    private double distanceFromLimelightToGoalMeters;
 
     @Override
     public void initSendable(SendableBuilder builder){
@@ -26,11 +26,39 @@ public class Limelight implements Sendable{
         builder.addDoubleProperty("ForwardSpeed", ()-> rangeForward(), null);
         builder.addDoubleProperty("AngularSpeed", ()-> aimAngular(), null);
         builder.addDoubleProperty("TranslationSpeed", ()-> translation(), null);
+        builder.addDoubleProperty("DistanceTarget", ()-> getDistanceToTarget(), null);
 
     }
 
     public Limelight(){
+
     }
+
+    @Override
+    public void periodic(){
+        double targetOffsetAngle_Vertical = LimelightHelpers.getTY("limelight-buluk");
+
+        // how many degrees back is your limelight rotated from perfectly vertical?
+        double limelightMountAngleDegrees = 25.1; 
+
+        // distance from the center of the Limelight lens to the floor
+        double limelightLensHeightCM = 19.0; 
+
+        // distance from the target to the floor
+        double goalHeightCM = 33.0; 
+
+        double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
+        double angleToGoalRadians = angleToGoalDegrees * (Math.PI / 180.0);
+
+        //calculate distance
+        distanceFromLimelightToGoalMeters = ((goalHeightCM - limelightLensHeightCM) / Math.tan(angleToGoalRadians)) / 100;
+
+    }
+
+    public double getDistanceToTarget(){
+        return distanceFromLimelightToGoalMeters;
+    }
+
 
     public void blink(){
         LimelightHelpers.setLEDMode_ForceBlink(kName);

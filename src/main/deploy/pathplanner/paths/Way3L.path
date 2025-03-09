@@ -3,25 +3,41 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.0,
-        "y": 7.0
+        "x": 0.704,
+        "y": 6.667
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.0,
-        "y": 7.0
+        "x": 2.269778846386757,
+        "y": 6.667
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 4.0,
-        "y": 6.0
+        "x": 3.047115384615384,
+        "y": 6.5019230769230765
       },
       "prevControl": {
-        "x": 3.0,
-        "y": 6.0
+        "x": 2.8231436060566497,
+        "y": 6.8898535768483695
+      },
+      "nextControl": {
+        "x": 3.271087163174118,
+        "y": 6.113992576997783
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.6766666666666663,
+        "y": 5.418269230769231
+      },
+      "prevControl": {
+        "x": 3.2774215265954565,
+        "y": 6.1097820980475195
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,15 +49,10 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "",
-      "waypointRelativePos": 0.30790006752193855,
-      "endWaypointRelativePos": 0.9345037137069496,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "s"
-        }
-      }
+      "name": "Elevate",
+      "waypointRelativePos": 1.8,
+      "endWaypointRelativePos": null,
+      "command": null
     }
   ],
   "globalConstraints": {
@@ -54,13 +65,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -59.99999999999999
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Left",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 125.00000000000001
   },
   "useDefaultConstraints": true
 }

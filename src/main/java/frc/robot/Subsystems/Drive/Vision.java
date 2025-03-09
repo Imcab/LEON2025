@@ -7,6 +7,7 @@ public class Vision {
     public Limelight limelight;
     public boolean Limerequest = false;
     private boolean loop_ONCE = false;
+    private double distanceFromLimelightToGoalMeters;
 
     public Vision(){
 
@@ -20,15 +21,14 @@ public class Vision {
         loop_ONCE = false;
 
         if (!loop_ONCE) {
-            
-            limelight.update();
-
             loop_ONCE = true;
 
         }
 
-        
+    }
 
+    public double getDistanceToTargetMeters(){
+        return distanceFromLimelightToGoalMeters;
     }
  
     public void limeRequest(boolean toggle){

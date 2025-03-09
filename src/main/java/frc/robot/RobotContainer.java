@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -11,6 +14,9 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Commands.AlgaeCommands.AlgaeCommands;
+import frc.robot.Commands.Auto.RiseAuto;
+import frc.robot.Commands.Auto.feedAuto;
+import frc.robot.Commands.Auto.retractAuto;
 import frc.robot.Commands.DriveCommands.DriveCommands;
 import frc.robot.Commands.ElevatorCommands.joystickElevator;
 import frc.robot.Commands.ElevatorCommands.moveBack;
@@ -18,6 +24,7 @@ import frc.robot.Commands.ElevatorCommands.movePosition;
 import frc.robot.Commands.RoutinesCommands.Feed;
 import frc.robot.Commands.WristCommands.AngleWrist;
 import frc.robot.Commands.WristCommands.ManualWrist;
+import frc.robot.Commands.WristCommands.wristSpeed;
 import frc.robot.Subsystems.ElevatorSubsystem;
 import frc.robot.Subsystems.REVBlinkin;
 import frc.robot.Subsystems.REVBlinkin.PatternType;
@@ -75,11 +82,15 @@ public class RobotContainer {
     operator.rightStick().whileTrue(new ManualWrist(coralWrist, ()-> operator.getRightY() * 0.1));
     //---------------------------------------------------------------- OPERATOR ----------------------------------------------------------------
     
+    NamedCommands.registerCommand("out", new wristSpeed(coralWrist, 0.7).withTimeout(0.6));
+    NamedCommands.registerCommand("ForwardFast", DriveCommands.moveInY(drive, 0.3).withTimeout(0.3));
+    NamedCommands.registerCommand("Retract", new retractAuto(elevator, coralWrist));
+    NamedCommands.registerCommand("L4", new RiseAuto(elevator, coralWrist, ()-> 1.87, 45));
+    NamedCommands.registerCommand("feedAuto", new feedAuto(elevator, ()-> 0.83, coralWrist, 15.3472, drive));
 
-    
   }
 
   public Command getAutonomousCommand() {
-    return Commands.print("No autonomous command configured");
+    return new PathPlannerAuto("L4Right");
   }
 }

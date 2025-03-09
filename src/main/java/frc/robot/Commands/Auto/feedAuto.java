@@ -1,27 +1,31 @@
-package frc.robot.Commands.RoutinesCommands;
+package frc.robot.Commands.Auto;
 
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Subsystems.ElevatorSubsystem;
 import frc.robot.Subsystems.Components.CoralWrist;
 import frc.robot.Subsystems.Drive.swerve;
 import frc.robot.Subsystems.REVBlinkin.PatternType;
 
-public class Feed extends Command{
+public class feedAuto extends Command{
 
     private ElevatorSubsystem elevator;
     private CoralWrist coral;
     private DoubleSupplier position;
     private double degrees;
     private swerve drive;
+    private Debouncer debouncer;
 
-    public Feed(ElevatorSubsystem elevator, DoubleSupplier position, CoralWrist coral, double degrees, swerve drive) {
+    public feedAuto(ElevatorSubsystem elevator, DoubleSupplier position, CoralWrist coral, double degrees, swerve drive) {
         this.elevator = elevator;
         this.coral = coral;
         this.position = position;
         this.degrees = degrees;
         this.drive = drive;
+        this.debouncer = new Debouncer(0.3, DebounceType.kRising);
     
         addRequirements(elevator, coral);
     }
@@ -53,7 +57,7 @@ public class Feed extends Command{
     
     @Override
     public boolean isFinished(){
-        return false;
+        return debouncer.calculate(coral.hasPiece());
     }
 
 

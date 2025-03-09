@@ -19,7 +19,7 @@ public class moveBack extends Command{
     public moveBack(ElevatorSubsystem elevator, DoubleSupplier position, CoralWrist coral, double degrees, swerve Drive){
         this.elevator = elevator;
         this.position = position;
-        this.drive = drive;
+        this.drive = Drive;
 
         this.coral = coral;
         this.degrees = degrees;
@@ -38,7 +38,7 @@ public class moveBack extends Command{
         elevator.setPosition(position);
 
         if( !elevator.atGoal()){
-            drive.blinkin.setPattern(PatternType.TwinklesForestPalette);
+            drive.blinkin.setPattern(PatternType.FireLarge);
         }
     }
 

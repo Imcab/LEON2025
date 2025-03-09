@@ -3,6 +3,7 @@ package frc.robot.Commands.ElevatorCommands;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.BulukLib.Math.Domain;
 import frc.robot.Subsystems.ElevatorSubsystem;
 import frc.robot.Subsystems.Components.CoralWrist;
 import frc.robot.Subsystems.Drive.swerve;
@@ -15,6 +16,7 @@ public class movePosition extends Command{
     private DoubleSupplier position;
     private CoralWrist coral;
     private double degrees;
+    private Domain tolerance;
 
     public movePosition(ElevatorSubsystem elevator, DoubleSupplier position, CoralWrist coral, double degrees, swerve Drive){
 
@@ -25,6 +27,8 @@ public class movePosition extends Command{
         this.degrees = degrees;
 
         this.Drive = Drive;
+
+        this.tolerance = new Domain(position.getAsDouble() - 0.05, position.getAsDouble() + 0.05);
 
         addRequirements(elevator, coral);
     }
@@ -40,10 +44,10 @@ public class movePosition extends Command{
         coral.requestPositionDown(degrees);
         elevator.setPosition(position);
 
-        if( !elevator.atGoal()){
-            Drive.blinkin.setPattern(PatternType.HeartbeatWhite);
+        if(tolerance.inRange(elevator.getMeters())){
+            Drive.blinkin.setPattern(PatternType.Gold);
         }else{
-            Drive.blinkin.setPattern(PatternType.White);
+            Drive.blinkin.setPattern(PatternType.HeartbeatWhite);
         }
     }
 
