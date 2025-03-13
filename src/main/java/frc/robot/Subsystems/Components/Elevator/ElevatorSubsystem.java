@@ -80,7 +80,7 @@ public class ElevatorSubsystem extends SubsystemBase{
         this.fullRangeMeters = new Domain(minMeters, maxMeters); 
 
         this.firstStage = new Domain(
-            Double.NEGATIVE_INFINITY, DomainEdge.FULL,
+            -0.0, DomainEdge.FULL,
             secondStageMeters, DomainEdge.EMPTY);
 
         this.secondStage = new Domain(
@@ -89,7 +89,7 @@ public class ElevatorSubsystem extends SubsystemBase{
 
         this.maxStage = new Domain(
             thirdStageMeters, DomainEdge.FULL,
-            Double.POSITIVE_INFINITY, DomainEdge.FULL);
+            3.0, DomainEdge.FULL);
 
         limitSwitch = new DigitalInput(limitPort);
 

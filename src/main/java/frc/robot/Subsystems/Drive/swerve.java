@@ -1,6 +1,7 @@
 package frc.robot.Subsystems.Drive;
 
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -29,6 +30,8 @@ import frc.robot.BulukLib.Vision.LimelightHelpers;
 import frc.robot.BulukLib.Vision.VisionConfig;
 import frc.robot.Subsystems.Hardware.REVBlinkin;
 import frc.robot.Subsystems.Hardware.REVBlinkin.PatternType;
+import frc.robot.SwerveLib.Dashboard.AdvantageSwerve;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
@@ -67,15 +70,11 @@ public class swerve extends SubsystemBase{
 
     private Vision vision = new Vision();
 
-    /*private double [] meters = new double[4];
-
-    private double[] metersPerSec = new double[4];
-
-    private double[] encoders = new double[4];*/
-
     public REVBlinkin blinkin;
 
     private CommandXboxController driveController;
+
+    private AdvantageSwerve logSwerve = new AdvantageSwerve("swervePose");
 
     
     public swerve(REVBlinkin blinkin, CommandXboxController driveController){
@@ -156,31 +155,11 @@ public class swerve extends SubsystemBase{
       
       poseEstimator.update(rawGyroRotation, modulePositions);
 
-      /*meters[0] = modules[0].getDrivePositionMeters();
-      meters[1] = modules[1].getDrivePositionMeters();
-      meters[2] = modules[2].getDrivePositionMeters();
-      meters[3] = modules[3].getDrivePositionMeters();
+      updateMegaTag2();
 
-      metersPerSec[0] = modules[0].getRotorMPS();
-      metersPerSec[1] = modules[1].getRotorMPS();
-      metersPerSec[2] = modules[2].getRotorMPS();
-      metersPerSec[3] = modules[3].getRotorMPS();
+      logSwerve.sendSwerve(getChassisSpeeds(), poseEstimator.getEstimatedPosition(), getModuleStates());
 
-      encoders[0] = modules[0].AngleEncoder().getRotations();
-      encoders[1] = modules[1].AngleEncoder().getRotations();
-      encoders[2] = modules[2].AngleEncoder().getRotations();
-      encoders[3] = modules[3].AngleEncoder().getRotations();
-
-      SmartDashboard.putNumber("ENCODER FL", encoders[0]);
-      SmartDashboard.putNumber("ENCODER FR", encoders[1]);
-      SmartDashboard.putNumber("ENCODER BL", encoders[2]);
-      SmartDashboard.putNumber("ENCODER BR", encoders[3]);
-
-      SmartDashboard.putNumberArray("METERS_MODULES", meters);
-
-      SmartDashboard.putNumberArray("METERSPERSECOND", metersPerSec);*/
-
-      boolean validDistance = DomainUtils.inRange(vision.limelight.ty(), -0.7, Double.POSITIVE_INFINITY);
+      boolean validDistance = DomainUtils.inRange(vision.limelight.ty(), -0.7, 100);
       
       if (!ledRequested) {
         if (validDistance && LimelightHelpers.getTV("limelight-buluk")) {
@@ -205,6 +184,31 @@ public class swerve extends SubsystemBase{
       }
 
     
+
+    }
+
+    public void updateMegaTag2(){
+
+      boolean rejectPose = false;
+
+      LimelightHelpers.SetRobotOrientation(
+        "limelight-buluk",
+        poseEstimator.getEstimatedPosition().getRotation().getDegrees(),
+        0, 0, 0, 0, 0);
+
+      LimelightHelpers.PoseEstimate megaTag2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-buluk");
+
+      if (Math.abs(navX.getRate()) > 720) {
+        rejectPose = true;
+      }
+      if (megaTag2.tagCount  == 0) {
+        rejectPose = true;
+      }
+
+      if (!rejectPose) {
+        poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7, 999999999));
+        poseEstimator.addVisionMeasurement(megaTag2.pose, megaTag2.timestampSeconds);
+      }
 
     }
 
