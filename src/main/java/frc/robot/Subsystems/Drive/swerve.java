@@ -1,6 +1,5 @@
 package frc.robot.Subsystems.Drive;
 
-import edu.wpi.first.apriltag.AprilTagPoseEstimator;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -15,9 +14,6 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
@@ -31,10 +27,8 @@ import frc.robot.BulukLib.Swerve.SwerveConfig.measures;
 import frc.robot.BulukLib.Swerve.SwerveConfig.reductions;
 import frc.robot.BulukLib.Vision.LimelightHelpers;
 import frc.robot.BulukLib.Vision.VisionConfig;
-import frc.robot.BulukLib.Vision.VisionConfig.limelight;
-import frc.robot.Subsystems.REVBlinkin;
-import frc.robot.Subsystems.REVBlinkin.PatternType;
-import frc.robot.SwerveLib.Dashboard.AdvantageSwerve;
+import frc.robot.Subsystems.Hardware.REVBlinkin;
+import frc.robot.Subsystems.Hardware.REVBlinkin.PatternType;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
@@ -65,23 +59,19 @@ public class swerve extends SubsystemBase{
         new SwerveModulePosition(),
         new SwerveModulePosition()
       };
-    private SwerveDrivePoseEstimator poseEstimator =
-      new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
-      private SwerveDrivePoseEstimator poseEstimatorApril =
+    private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
     private ModuleSpark []modules  = new ModuleSpark[4];
 
     private Vision vision = new Vision();
 
-    private AdvantageSwerve swervePublisher = new AdvantageSwerve("BulukSwerve");
-
-    private double [] meters = new double[4];
+    /*private double [] meters = new double[4];
 
     private double[] metersPerSec = new double[4];
 
-    private double[] encoders = new double[4];
+    private double[] encoders = new double[4];*/
 
     public REVBlinkin blinkin;
 
@@ -114,7 +104,7 @@ public class swerve extends SubsystemBase{
       this::runVelocity,
       new PPHolonomicDriveController(
         new PIDConstants(5.5, 0.0,0),
-         new PIDConstants(2.88, 0.0, 0.001)),
+         new PIDConstants(2.93, 0.0, 0.001)),
       getPathPlannerConfiguration(),
       () -> DriverStation.getAlliance().
         orElse(Alliance.Blue) == Alliance.Red,
@@ -130,9 +120,65 @@ public class swerve extends SubsystemBase{
 
     public void periodic(){
 
-      swervePublisher.sendSwerve(getChassisSpeeds(), getPose(), getModuleStates());
+      SmartDashboard.putBoolean("LedsByMech", ledRequested);
 
-      vision.periodic();
+      for (var module : modules) {
+        module.periodic();
+      }
+      if (DriverStation.isDisabled()) {
+        for (var module : modules) {
+          module.stop();
+      }}
+
+      //LimelightHelpers.SetRobotOrientation(limelight.name, poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+      
+      SwerveModulePosition[] modulePositions = getModulePositions();
+      SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
+
+      for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
+        moduleDeltas[moduleIndex] =
+            new SwerveModulePosition(
+                modulePositions[moduleIndex].distanceMeters
+                    - lastModulePositions[moduleIndex].distanceMeters,
+                modulePositions[moduleIndex].angle);
+        lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
+      }
+
+      // Update gyro angle
+      if (navX.isConnected() == true) {
+        // Use the real gyro angle
+        rawGyroRotation = getnavXRotation();
+      } else {
+        // Use the angle delta from the kinematics and module deltas
+        Twist2d twist = kinematics.toTwist2d(moduleDeltas);
+        rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
+      }
+      
+      poseEstimator.update(rawGyroRotation, modulePositions);
+
+      /*meters[0] = modules[0].getDrivePositionMeters();
+      meters[1] = modules[1].getDrivePositionMeters();
+      meters[2] = modules[2].getDrivePositionMeters();
+      meters[3] = modules[3].getDrivePositionMeters();
+
+      metersPerSec[0] = modules[0].getRotorMPS();
+      metersPerSec[1] = modules[1].getRotorMPS();
+      metersPerSec[2] = modules[2].getRotorMPS();
+      metersPerSec[3] = modules[3].getRotorMPS();
+
+      encoders[0] = modules[0].AngleEncoder().getRotations();
+      encoders[1] = modules[1].AngleEncoder().getRotations();
+      encoders[2] = modules[2].AngleEncoder().getRotations();
+      encoders[3] = modules[3].AngleEncoder().getRotations();
+
+      SmartDashboard.putNumber("ENCODER FL", encoders[0]);
+      SmartDashboard.putNumber("ENCODER FR", encoders[1]);
+      SmartDashboard.putNumber("ENCODER BL", encoders[2]);
+      SmartDashboard.putNumber("ENCODER BR", encoders[3]);
+
+      SmartDashboard.putNumberArray("METERS_MODULES", meters);
+
+      SmartDashboard.putNumberArray("METERSPERSECOND", metersPerSec);*/
 
       boolean validDistance = DomainUtils.inRange(vision.limelight.ty(), -0.7, Double.POSITIVE_INFINITY);
       
@@ -157,68 +203,9 @@ public class swerve extends SubsystemBase{
           driveController.getHID().setRumble(RumbleType.kBothRumble, 0);
         }
       }
-      
-      for (var module : modules) {
-        module.periodic();
-      }
-      if (DriverStation.isDisabled()) {
-        for (var module : modules) {
-          module.stop();
-      }}
 
-      LimelightHelpers.SetRobotOrientation(limelight.name, poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+    
 
-      meters[0] = modules[0].getDrivePositionMeters();
-      meters[1] = modules[1].getDrivePositionMeters();
-      meters[2] = modules[2].getDrivePositionMeters();
-      meters[3] = modules[3].getDrivePositionMeters();
-
-      metersPerSec[0] = modules[0].getRotorMPS();
-      metersPerSec[1] = modules[1].getRotorMPS();
-      metersPerSec[2] = modules[2].getRotorMPS();
-      metersPerSec[3] = modules[3].getRotorMPS();
-
-      encoders[0] = modules[0].AngleEncoder().getRotations();
-      encoders[1] = modules[1].AngleEncoder().getRotations();
-      encoders[2] = modules[2].AngleEncoder().getRotations();
-      encoders[3] = modules[3].AngleEncoder().getRotations();
-
-      SmartDashboard.putNumber("ENCODER FL", encoders[0]);
-      SmartDashboard.putNumber("ENCODER FR", encoders[1]);
-      SmartDashboard.putNumber("ENCODER BL", encoders[2]);
-      SmartDashboard.putNumber("ENCODER BR", encoders[3]);
-
-      SmartDashboard.putNumberArray("METERS_MODULES", meters);
-
-      SmartDashboard.putNumberArray("METERSPERSECOND", metersPerSec);
-
-      SwerveModulePosition[] modulePositions = getModulePositions();
-      SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
-
-      for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
-        moduleDeltas[moduleIndex] =
-            new SwerveModulePosition(
-                modulePositions[moduleIndex].distanceMeters
-                    - lastModulePositions[moduleIndex].distanceMeters,
-                modulePositions[moduleIndex].angle);
-        lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
-      }
-
-      // Update gyro angle
-      if (navX.isConnected() == true) {
-        // Use the real gyro angle
-        rawGyroRotation = getnavXRotation();
-      } else {
-        // Use the angle delta from the kinematics and module deltas
-        Twist2d twist = kinematics.toTwist2d(moduleDeltas);
-        rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
-      }
-
-      SmartDashboard.putNumber("NaxX", getAngle());
-
-      // Apply odometry update
-      poseEstimator.update(rawGyroRotation, modulePositions);
-      poseEstimatorApril.update(rawGyroRotation, modulePositions);
     }
 
     public double getAngle(){
@@ -280,14 +267,6 @@ public class swerve extends SubsystemBase{
       optimizedSetpointStates[i] = modules[i].runSetpoint(setpointStates[i]);
     }
 
-
-  }
-
-  public void testSpeed(double speed){
-    modules[0].driveTestSpeed(speed);
-    modules[1].driveTestSpeed(speed);
-    modules[2].driveTestSpeed(speed);
-    modules[3].driveTestSpeed(speed);
 
   }
 

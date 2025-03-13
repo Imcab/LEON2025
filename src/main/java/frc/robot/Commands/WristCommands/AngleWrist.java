@@ -24,7 +24,6 @@ public class AngleWrist extends Command {
 
     @Override
     public void end (boolean interrupted) {
-       coral.stop();
     }
     
     @Override

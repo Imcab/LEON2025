@@ -1,4 +1,4 @@
-package frc.robot.Subsystems;
+package frc.robot.Subsystems.Components.Elevator;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -24,11 +24,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.BulukLib.Math.Domain;
 import frc.robot.BulukLib.Math.DomainUtils;
 import frc.robot.BulukLib.Math.Domain.DomainEdge;
-import frc.robot.BulukLib.MotionControllers.Gains.PIDGains;
-import frc.robot.BulukLib.MotionModel.MotionModel;
-import frc.robot.BulukLib.MotionModel.MotionModel.Gains;
+
 import frc.robot.BulukLib.MotionModel.MotionModel.VelocityGoal;
-import frc.robot.Subsystems.Components.ElevatorConstants;
 
 public class ElevatorSubsystem extends SubsystemBase{
 
@@ -76,19 +73,9 @@ public class ElevatorSubsystem extends SubsystemBase{
 
     private boolean shouldStop = false;
 
-    private MotionModel profile = new MotionModel(
-        new Gains(
-            new PIDGains(90.5, 0, 0),
-            ElevatorConstants.fullMaxAcc,
-            ElevatorConstants.fullMaxVelocity,
-            kV[0], kS[0], kA[0], kG[0])
-    );
-    
     public ElevatorSubsystem(String key){
 
         this.DashboardKey = key;
-
-        SmartDashboard.putData(profile);
 
         this.fullRangeMeters = new Domain(minMeters, maxMeters); 
 
@@ -134,10 +121,6 @@ public class ElevatorSubsystem extends SubsystemBase{
                 ElevatorConstants.fullMaxVelocity,
                 ElevatorConstants.fullMaxAcc),
             0.02);
-
-
-        profile.setTolerance(0.02, 0.08);
-        profile.reset(0.63, 0);
 
         trapezoid.setTolerance(0.02, 0.08);
 
@@ -238,13 +221,6 @@ public class ElevatorSubsystem extends SubsystemBase{
             elevatorStage = 2;
         }
 
-        profile.setFeedForward(
-            kV[getStage()],
-            kS[getStage()],
-            kA[getStage()],
-            kG[getStage()]
-        );
-
         if (pressed()) {
             setEncoderPosition(0.0);
         }
@@ -262,9 +238,6 @@ public class ElevatorSubsystem extends SubsystemBase{
 
             VelocityGoal goal = new VelocityGoal(setpoint.velocity, acceleration);
 
-            SmartDashboard.putNumber(DashboardKey + ": ACC", acceleration);
-
-
             double output = trapezoid.calculate(getMeters(), this.setpoint)
             + feedforwardCalculate(
                 kS[getStage()],
@@ -273,8 +246,6 @@ public class ElevatorSubsystem extends SubsystemBase{
                 kA[getStage()],
                 goal);
 
-            SmartDashboard.putNumber(DashboardKey + ": OUTPUT", acceleration);
-    
             leader.setVoltage(output);
     
             atGoal = DomainUtils.inRange(getMeters(), trapezoidGoal.get().position - 0.01, trapezoidGoal.get().position + 0.01);
@@ -300,7 +271,6 @@ public class ElevatorSubsystem extends SubsystemBase{
         SmartDashboard.putBoolean(DashboardKey + ": LIMITSWITCH", pressed());
         SmartDashboard.putNumber(DashboardKey + ": STAGE", getStage());
         SmartDashboard.putNumber(DashboardKey +": APPLIED SPEED",  appliedSpeed());
-        SmartDashboard.putNumber(DashboardKey +": VOLTS FED",  voltsFed());
         SmartDashboard.putNumber(DashboardKey + ": METERS", getMeters());
         
     }

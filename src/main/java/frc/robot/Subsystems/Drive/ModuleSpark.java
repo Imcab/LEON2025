@@ -13,12 +13,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.AnalogInput;
 import frc.robot.BulukLib.MotionControllers.ClosedLoopControl.ClosedLoopControl;
 import frc.robot.BulukLib.MotionControllers.ClosedLoopControl.ClosedLoopControl.ClosedLoopRequest;
 import frc.robot.BulukLib.MotionControllers.ClosedLoopControl.ClosedLoopControl.OutputType;
-import frc.robot.BulukLib.MotionControllers.Gains.FeedForwardGains;
-import frc.robot.BulukLib.MotionControllers.Gains.PIDGains;
 import frc.robot.BulukLib.Swerve.SwerveConfig;
 import frc.robot.BulukLib.Swerve.SwerveConfig.measures;
 import frc.robot.BulukLib.Swerve.SwerveConfig.reductions;
@@ -62,8 +59,6 @@ public class ModuleSpark {
         turnRequest =  turnControl.new ClosedLoopRequest();
 
         turnControl.enableContinuousInput(Math.PI);
-
-        turnControl.initTuning("TurnTune");
 
         switch (index) {
           case 0:
@@ -237,11 +232,6 @@ public class ModuleSpark {
     // Disable closed loop control for turn and drive
     angleSetpoint = null;
     speedSetpoint = null;
-  }
-
-  public void driveTestSpeed(double speed){
-    driveSparkMax.set(speed);
-    angleSetpoint = new Rotation2d(); // puts the wheels in 0 degrees
   }
 
 }

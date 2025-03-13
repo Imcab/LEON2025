@@ -4,6 +4,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ConstantsHanger;
 
@@ -34,6 +35,12 @@ public class Climber extends SubsystemBase{
         rightHanger.getConfigurator().apply(RightConfig);
         leftHanger.getConfigurator().apply(LeftConfig);
     
+    }
+
+
+    @Override
+    public void periodic(){
+        SmartDashboard.putNumber("Rot", rightHanger.getRotorPosition().getValueAsDouble());
     }
 
     public void setSpeed(double speed){

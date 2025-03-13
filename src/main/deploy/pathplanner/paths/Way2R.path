@@ -3,41 +3,41 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.3,
-        "y": 2.65
+        "x": 5.2702730108057585,
+        "y": 2.5680453140095008
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.192692307692307,
-        "y": 2.1363461538461537
+        "x": 4.8165,
+        "y": 1.840999999999999
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.1916025641025634,
-        "y": 1.868012820512821
+        "x": 3.2175,
+        "y": 1.3457479508196706
       },
       "prevControl": {
-        "x": 4.250961690269776,
-        "y": 2.160249820834816
+        "x": 3.6952499999999997,
+        "y": 1.501747950819671
       },
       "nextControl": {
-        "x": 2.892307692307692,
-        "y": 1.785448717948717
+        "x": 2.793071895746432,
+        "y": 1.2071591820838112
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 0.694038461538461,
-        "y": 1.3726282051282044
+        "x": 0.907,
+        "y": 1.168
       },
       "prevControl": {
-        "x": 0.44525939287923766,
-        "y": 1.3479507863602413
+        "x": 0.6582209313407766,
+        "y": 1.143322581232037
       },
       "nextControl": null,
       "isLocked": false,
@@ -47,19 +47,7 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "retract",
-      "waypointRelativePos": 0.21607022282241967,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "Retract"
-        }
-      }
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,

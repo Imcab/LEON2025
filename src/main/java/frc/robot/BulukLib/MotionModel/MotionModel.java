@@ -3,12 +3,11 @@ package frc.robot.BulukLib.MotionModel;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
-import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.BulukLib.MotionControllers.Gains.PIDGains;
 
-public class MotionModel extends ProfiledPIDController implements Sendable{
+public class MotionModel extends ProfiledPIDController{
 
     public static class Gains{
 

@@ -1,9 +1,8 @@
-package frc.robot.Subsystems;
+package frc.robot.Subsystems.Hardware;
 
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class REVBlinkin extends SubsystemBase{
+public class REVBlinkin{
 
     private final Spark signal;
 

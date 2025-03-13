@@ -91,12 +91,10 @@ public class CoralWrist extends SubsystemBase{
 
     @Override
     public void periodic(){
-        pidUp.graph("CoralWristUP");
-        pidDown.graph("CoralWristDOWN");
+
         SmartDashboard.putNumber("CORALWRIST: RawPosition:", getRawPosition());
         SmartDashboard.putBoolean("CORALWRIST: AtGoal:"  , atGoal());
         SmartDashboard.putNumber("CORALWRIST: Target:", target);
-        SmartDashboard.putNumber("CoralP", getRawPosition());
         SmartDashboard.putBoolean("PIECE", hasPiece());
     }
 

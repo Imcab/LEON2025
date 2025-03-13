@@ -28,7 +28,7 @@ public class SwerveConfig{
     }
 
     public class currentLimiting{
-        public static final int driveCurrentLimit = 43; 
+        public static final int driveCurrentLimit = 50; 
         public static final int turnCurrentLimit = 20;
         
     }

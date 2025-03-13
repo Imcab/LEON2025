@@ -1,4 +1,4 @@
-package frc.robot.Subsystems.Components;
+package frc.robot.Subsystems.Components.Elevator;
 
 import frc.robot.BulukLib.Math.Domain;
 

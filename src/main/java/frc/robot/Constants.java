@@ -1,8 +1,6 @@
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import frc.robot.BulukLib.MotionControllers.Gains.Gains;
-import frc.robot.BulukLib.MotionControllers.Gains.TrapezoidalGains;
 
 public class Constants {
     
@@ -10,9 +8,6 @@ public class Constants {
 
         public static final int RightHangerPort = 17;
         public static final int LeftHangerPort = 18;
-        //public static final int switchPort = 0;
-        public static final boolean r_inverted = true;
-        public static final boolean l_inverted = false;
     }
 
   public class WristConstants {

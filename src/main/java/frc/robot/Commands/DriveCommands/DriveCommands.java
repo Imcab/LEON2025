@@ -11,9 +11,10 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.BulukLib.Swerve.SwerveConfig.measures;
 import frc.robot.BulukLib.Util.QoLUtil;
 import frc.robot.Subsystems.Drive.swerve;
+import frc.robot.Subsystems.Hardware.REVBlinkin.PatternType;
+import frc.robot.SwerveLib.Tidal.TidalUtils.Coordinate;
 
 import java.util.function.DoubleSupplier;
 
@@ -73,8 +74,19 @@ public class DriveCommands {
   }
   
   public static Command resetHeading(swerve drive){
-        return Commands.runOnce(()-> {drive.resetHeading();
-        }, drive);
+        return Commands.runOnce(()-> {
+            drive.blinkin.setPattern(PatternType.ShotRed);
+            drive.resetHeading();
+        }, drive).beforeStarting(()-> drive.offLeds(true)).finallyDo(()-> drive.offLeds(false));
+  }
+
+  public static Command uploadPose(swerve drive,Coordinate coordinate){
+    return Commands.runOnce(
+        ()->{
+            drive.blinkin.setPattern(PatternType.LightChaseGray);
+            drive.setPose(coordinate.toPose2d());
+        },
+        drive).beforeStarting(()-> drive.offLeds(true)).finallyDo(()-> drive.offLeds(false));
   }
 
   public static Command brake(swerve drive){

@@ -1,6 +1,5 @@
 package frc.robot.BulukLib.Vision;
 
-import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -14,7 +13,7 @@ public class Limelight extends SubsystemBase{
     private PoseEstimate mt2 = new PoseEstimate();
     private double distanceFromLimelightToGoalMeters;
 
-    @Override
+    /*@Override
     public void initSendable(SendableBuilder builder){
 
         builder.addBooleanProperty("TV", ()-> LimelightHelpers.getTV("limelight-buluk"), null);
@@ -28,7 +27,7 @@ public class Limelight extends SubsystemBase{
         builder.addDoubleProperty("TranslationSpeed", ()-> translation(), null);
         builder.addDoubleProperty("DistanceTarget", ()-> getDistanceToTarget(), null);
 
-    }
+    }*/
 
     public Limelight(){
 

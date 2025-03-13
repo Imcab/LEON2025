@@ -5,10 +5,10 @@ import java.util.function.DoubleSupplier;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Subsystems.ElevatorSubsystem;
 import frc.robot.Subsystems.Components.CoralWrist;
+import frc.robot.Subsystems.Components.Elevator.ElevatorSubsystem;
 import frc.robot.Subsystems.Drive.swerve;
-import frc.robot.Subsystems.REVBlinkin.PatternType;
+import frc.robot.Subsystems.Hardware.REVBlinkin.PatternType;
 
 public class feedAuto extends Command{
 
@@ -18,13 +18,15 @@ public class feedAuto extends Command{
     private double degrees;
     private swerve drive;
     private Debouncer debouncer;
+    private double speed;
 
-    public feedAuto(ElevatorSubsystem elevator, DoubleSupplier position, CoralWrist coral, double degrees, swerve drive) {
+    public feedAuto(ElevatorSubsystem elevator, DoubleSupplier position, CoralWrist coral, double degrees, double speed, swerve drive) {
         this.elevator = elevator;
         this.coral = coral;
         this.position = position;
         this.degrees = degrees;
         this.drive = drive;
+        this.speed = speed;
         this.debouncer = new Debouncer(0.3, DebounceType.kRising);
     
         addRequirements(elevator, coral);
@@ -37,7 +39,7 @@ public class feedAuto extends Command{
 
     @Override
     public void execute(){
-        coral.wheelSpeed(-0.6);
+        coral.wheelSpeed(speed); //-0.6
         elevator.setPosition(position);
         coral.requestPositionDown(degrees);
 

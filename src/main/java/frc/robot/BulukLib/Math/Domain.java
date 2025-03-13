@@ -190,6 +190,40 @@ public class Domain{
     }
 
     /**
+     * Checks if a value is in the max of the domain
+     * @param value the value to check
+     * @return true if the value is at maximum
+     */
+    public boolean inMax(double value){
+        boolean maxBool;
+
+        if (maxEdge == DomainEdge.EMPTY) {
+            maxBool = value < max;
+        }else{
+            maxBool = value <= max;
+        }
+
+        return maxBool;
+    }
+
+    /**
+     * Checks if a value is in the min of the domain
+     * @param value the value to check
+     * @return true if the value is at minimum
+     */
+    public boolean inMin(double value){
+        boolean minBool;
+
+        if (minEdge == DomainEdge.EMPTY) {
+            minBool = value > max;
+        }else{
+            minBool = value >= max;
+        }
+
+        return minBool;
+    }
+
+    /**
      * Check if a value is out of the domain
      * @param value the value to check
      * @return true if the value is out of the domain

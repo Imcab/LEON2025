@@ -5,9 +5,28 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "deadline",
           "data": {
-            "pathName": "Way1R"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Way1R"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "L3"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "L4"
           }
         },
         {
@@ -30,21 +49,41 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "BackFast"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "BackFast"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Retract"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "named",
+          "type": "deadline",
           "data": {
-            "name": "Retract"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Way2R"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Way2R"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "feedPrep"
+                }
+              }
+            ]
           }
         },
         {
@@ -57,6 +96,50 @@
           "type": "path",
           "data": {
             "pathName": "Way3R"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "L4"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "out"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "ForwardFast"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "BackFast"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Retract"
+                }
+              }
+            ]
           }
         }
       ]

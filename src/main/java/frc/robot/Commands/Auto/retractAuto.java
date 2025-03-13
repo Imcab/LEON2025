@@ -1,8 +1,8 @@
 package frc.robot.Commands.Auto;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Subsystems.ElevatorSubsystem;
 import frc.robot.Subsystems.Components.CoralWrist;
+import frc.robot.Subsystems.Components.Elevator.ElevatorSubsystem;
 
 public class retractAuto extends Command{
     private ElevatorSubsystem elevator;

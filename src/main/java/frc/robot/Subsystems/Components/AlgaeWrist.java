@@ -6,8 +6,6 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.BulukLib.MotionControllers.ClosedLoopControl.ClosedLoopControl;
 import frc.robot.BulukLib.MotionControllers.ClosedLoopControl.ClosedLoopControl.ClosedLoopRequest;
@@ -36,8 +34,6 @@ public class AlgaeWrist extends SubsystemBase{
 
         request = pid.new ClosedLoopRequest();
 
-        //pid.initTuning("algaeTuner");
-
         pid.setTolerance(5);
 
         configWrist = new SparkMaxConfig();
@@ -49,10 +45,7 @@ public class AlgaeWrist extends SubsystemBase{
 
     @Override
     public void periodic(){
-        pid.graph("algaeGraph");
-        //pid.tuneWithInterface();
-        SmartDashboard.putNumber("AlgaePos", getPosition());
-        SmartDashboard.putBoolean("AlgaeWrist", atGoal());
+
     }
 
     private void burnflash(){
